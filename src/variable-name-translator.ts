@@ -17,13 +17,13 @@ export class VariableNameTranslator implements IVariableNameTranslator {
 
   async translateVariableName(text: string): Promise<VariableName> {
     const src: string = await this.translator.detectLanguage(text);
-    if (src === 'EN') {
+    if (src === 'en') {
       return this.convertToVariableFormats(text);
     }
 
     const translatedText: string = await this.translator.translate(
       src,
-      'EN',
+      'en',
       text,
     );
     return this.convertToVariableFormats(translatedText);
