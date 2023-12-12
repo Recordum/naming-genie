@@ -16,8 +16,26 @@
       {
         "command": "namingenie.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "namingenie.enterCredentials",
+        "title": "Enter Translation Service Credentials"
       }
-    ]
+    ],
+    "configuration": {
+      "properties": {
+          "namingenie.clientId": {
+              "type": "string",
+              "default": "",
+              "description": "Client ID for the translation service"
+          },
+          "namingenie.clientSecret": {
+              "type": "string",
+              "default": "",
+              "description": "Client Secret for the translation service"
+          }
+      }
+  }
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
