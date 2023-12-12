@@ -21,10 +21,10 @@ export class PapagoTranslator implements Translator {
   }
 
   async translate(src: string, target: string, text: string): Promise<string> {
-    const apiURL = 'https://naveropenapi.apigw.ntruss.com/nmt/v1/translation';
+    const apiURL = 'https://openapi.naver.com/v1/papago/n2mt';
     const headers = {
-      'X-NCP-APIGW-API-KEY-ID': this.clientId,
-      'X-NCP-APIGW-API-KEY': this.clientSecret,
+      'X-Naver-Client-Id': this.clientId,
+      'X-Naver-Client-Secret': this.clientSecret,
     };
 
     const data = {
@@ -41,10 +41,10 @@ export class PapagoTranslator implements Translator {
   }
 
   async detectLanguage(text: string): Promise<string> {
-    const apiURL = 'https://naveropenapi.apigw.ntruss.com/langs/v1/dect';
+    const apiURL = 'https://openapi.naver.com/v1/papago/detectLangs';
     const headers = {
-      'X-NCP-APIGW-API-KEY-ID': this.clientId,
-      'X-NCP-APIGW-API-KEY': this.clientSecret,
+      'X-Naver-Client-Id': this.clientId,
+      'X-Naver-Client-Secret': this.clientSecret,
     };
 
     const data = {
