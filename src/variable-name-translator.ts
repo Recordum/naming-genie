@@ -1,4 +1,5 @@
-import { Translator } from './translator';
+import { isThisTypeNode } from 'typescript';
+import { Translator, TranslatorConfig, createTranslator } from './translator';
 
 export type VariableName = {
   snakeCase: string;
@@ -12,8 +13,13 @@ export interface IVariableNameTranslator {
   recommendVariableName(description: string): Promise<VariableName[]>;
 }
 
-export class VariableNameTranslator implements IVariableNameTranslator {
-  constructor(private readonly translator: Translator) {}
+export default function createVariableNameTranslator(config: TranslatorConfig) {
+  const translator = createTranslator(config);
+  return new VariableNameTranslator(translator);
+}
+
+class VariableNameTranslator implements IVariableNameTranslator {
+  constructor(private translator: Translator) {}
 
   async translateVariableName(text: string): Promise<VariableName> {
     const src: string = await this.translator.detectLanguage(text);
@@ -45,7 +51,7 @@ export class VariableNameTranslator implements IVariableNameTranslator {
   private convertToSnakeCase(text: string): string {
     return text
       .split(' ')
-      .map((word) => word.charAt(0).toLowerCase() + word.slice(1))
+      .map((word) => word.toLowerCase())
       .join('_');
   }
 

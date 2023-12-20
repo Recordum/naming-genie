@@ -4,14 +4,25 @@ export interface Translator {
   detectLanguage(text: string): Promise<string>;
 }
 
-export type TranslatorConfig = PapagoConfig;
+export function createTranslator(config: TranslatorConfig): Translator {
+  if (config.service === 'papago') {
+    return new PapagoTranslator({
+      clientId: config.clientId,
+      clientSecret: config.clientSecret,
+    });
+  }
+  throw Error('not-supported-service');
+}
+export type TranslatorConfig = {
+  service: string;
+} & PapagoConfig;
 
 export type PapagoConfig = {
   clientId: string;
   clientSecret: string;
 };
 
-export class PapagoTranslator implements Translator {
+class PapagoTranslator implements Translator {
   private readonly clientId: string;
   private readonly clientSecret: string;
 
