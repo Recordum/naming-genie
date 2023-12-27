@@ -18,7 +18,7 @@ export default function createVariableNameTranslator(config: TranslatorConfig) {
   return new VariableNameTranslator(translator);
 }
 
-class VariableNameTranslator implements IVariableNameTranslator {
+export class VariableNameTranslator implements IVariableNameTranslator {
   constructor(private translator: Translator) {}
 
   async translateVariableName(text: string): Promise<VariableName> {
