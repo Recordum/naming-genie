@@ -19,6 +19,7 @@ export default function createVariableNameTranslator(config: TranslatorConfig) {
 }
 /**
  * TODO: a/an 제거하기
+ * TODO: ' 제거하기
  */
 export class VariableNameTranslator implements IVariableNameTranslator {
   constructor(private translator: Translator) {}
@@ -34,11 +35,18 @@ export class VariableNameTranslator implements IVariableNameTranslator {
       'en',
       text,
     );
-    return this.convertToVariableFormats(translatedText);
+    const refineText: string = this.refineVariableName(translatedText);
+    return this.convertToVariableFormats(refineText);
   }
 
   async recommendVariableName(description: string): Promise<VariableName[]> {
     throw new Error('Method not implemented.');
+  }
+
+  private refineVariableName(text: string): string {
+    return text
+      .replace(/\b(a|an)\s+/g, '')
+      .replace(/'/g, '');
   }
 
   private convertToVariableFormats(text: string): VariableName {
