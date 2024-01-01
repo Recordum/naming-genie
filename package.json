@@ -20,6 +20,10 @@
       {
         "command": "namingenie.enterCredentials",
         "title": "Enter Translation Service Credentials"
+      },
+      {
+        "command": "namingenie.replaceWithVariableName",
+        "title": "replaceWithVariableName"
       }
     ],
     "configuration": {

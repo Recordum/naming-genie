@@ -17,7 +17,9 @@ export default function createVariableNameTranslator(config: TranslatorConfig) {
   const translator = createTranslator(config);
   return new VariableNameTranslator(translator);
 }
-
+/**
+ * TODO: a/an 제거하기
+ */
 export class VariableNameTranslator implements IVariableNameTranslator {
   constructor(private translator: Translator) {}
 

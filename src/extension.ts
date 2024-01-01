@@ -1,29 +1,125 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
-  console.log('Congratulations, your extension "namingenie" is now active!');
+import { NamingCodeActionProvider } from './code-action';
+import createVariableNameTranslator, {
+  VariableName,
+} from './variable-name-translator';
+import { Range } from 'vscode';
 
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
+/**
+ *
+ * @param context
+ * TODO: translator service 설정이 변경될때마다 variableNameTranslator를 재생성
+ * observer 패턴 사용해보기
+ */
+export function activate(context: vscode.ExtensionContext) {
+  const service = context.globalState.get('service') as string;
+  const clientId = context.globalState.get('clientId') as string;
+  const clientSecret = context.globalState.get('clientSecret') as string;
+
+  if (!service) {
+    registerEnterService(context);
+  }
+
+  const variableNameTranslator = createVariableNameTranslator({
+    service,
+    clientId,
+    clientSecret,
+  });
+
+  const provider = new NamingCodeActionProvider();
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      'namingenie.invokeNamingGenie',
+
+      async (document: vscode.TextDocument, range: Range) => {
+        const selectedText = document.getText(range);
+        const variableNames =
+          await variableNameTranslator.translateVariableName(selectedText);
+
+        const quickPickItems = Object.keys(variableNames).map((key) => ({
+          label: variableNames[key as keyof VariableName],
+          description: key,
+        }));
+
+        const pickedItem = await vscode.window.showQuickPick(quickPickItems, {
+          placeHolder: 'Choose the variable name format',
+        });
+
+        if (pickedItem) {
+          applySelectedVariableName(document, range, pickedItem.label);
+        }
+      },
+    ),
+  );
+
+  registerReplaceCommand(context);
+  registerEnterService(context);
+  // enterCredentialsQuickPick(context);
+}
+
+function applySelectedVariableName(
+  document: vscode.TextDocument,
+  range: Range,
+  variableName: string,
+) {
+  const editor = vscode.window.activeTextEditor;
+  if (editor && document === editor.document) {
+    editor.edit((editBuilder) => {
+      editBuilder.replace(range, variableName);
+    });
+  }
+}
+
+// This method is called when your extension is deactivated
+export function deactivate() {}
+
+function registerEnterService(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand(
-    'namingenie.helloWorld',
-    () => {
-      // The code you place here will be executed every time your command is executed
-      // Display a message box to the user
-      vscode.window.showInformationMessage(
-        'Hello World from NaminGenie!!!!!!!!',
-      );
+    'namingenie.enterCredentials',
+    async () => {
+      const service = await vscode.window.showInputBox({
+        prompt: 'Enter your translation service',
+      });
+      const clientId = await vscode.window.showInputBox({
+        prompt: 'Enter your Client ID for the Translation Service',
+      });
+      const clientSecret = await vscode.window.showInputBox({
+        prompt: 'Enter your Client Secret for the Translation Service',
+      });
+
+      if (clientId && clientSecret && service) {
+        context.globalState.update('service', service);
+        context.globalState.update('clientId', clientId);
+        context.globalState.update('clientSecret', clientSecret);
+        vscode.window.showInformationMessage(
+          'Translation Service Credentials Saved!',
+        );
+
+        const variableNameTranslator = createVariableNameTranslator({
+          service,
+          clientId,
+          clientSecret,
+        });
+      }
     },
   );
 
   context.subscriptions.push(disposable);
 }
 
-// This method is called when your extension is deactivated
-export function deactivate() {}
+function registerReplaceCommand(context: vscode.ExtensionContext) {
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      'namingenie.replaceWithVariableName',
+      (range: Range, replacement: string) => {
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+          editor.edit((editBuilder) => {
+            editBuilder.replace(range, replacement);
+          });
+        }
+      },
+    ),
+  );
+}
