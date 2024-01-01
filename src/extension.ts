@@ -12,10 +12,13 @@ import { Range } from 'vscode';
  * observer 패턴 사용해보기
  */
 export function activate(context: vscode.ExtensionContext) {
-  const service = context.globalState.get('service') as string;
-  const clientId = context.globalState.get('clientId') as string;
-  const clientSecret = context.globalState.get('clientSecret') as string;
-
+  // const service = context.globalState.get('service') as string;
+  const service = 'papago';
+  // const clientId = context.globalState.get('clientId') as string;
+  const clientId = 'wiJp72PeYk7XWLDAG0Qr';
+  // const clientSecret = context.globalState.get('clientSecret') as string;
+  const clientSecret = 'MJ2V0iF_O0';
+  console.log('=====start========');
   if (!service) {
     registerEnterService(context);
   }
@@ -36,12 +39,11 @@ export function activate(context: vscode.ExtensionContext) {
         const selectedText = document.getText(range);
         const variableNames =
           await variableNameTranslator.translateVariableName(selectedText);
-
+        console.log(variableNames);
         const quickPickItems = Object.keys(variableNames).map((key) => ({
           label: variableNames[key as keyof VariableName],
           description: key,
         }));
-
         const pickedItem = await vscode.window.showQuickPick(quickPickItems, {
           placeHolder: 'Choose the variable name format',
         });
@@ -52,7 +54,10 @@ export function activate(context: vscode.ExtensionContext) {
       },
     ),
   );
-
+  context.subscriptions.push(
+    vscode.languages.registerCodeActionsProvider(['*'], provider),
+  );
+  
   registerReplaceCommand(context);
   registerEnterService(context);
   // enterCredentialsQuickPick(context);

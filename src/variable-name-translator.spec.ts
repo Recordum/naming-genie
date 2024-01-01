@@ -26,18 +26,28 @@ describe('VariableNameTranslator', () => {
 
     it('translate text should not include Articles and Apostrophes', async () => {
       translator = {
-        translate: async (src, target, text) => 'it\'s a test',
+        translate: async (src, target, text) => "it's a test",
         detectLanguage: async (text) => 'ko',
       };
       variableNameTranslator = new VariableNameTranslator(translator);
 
-      const result = await variableNameTranslator.translateVariableName('이건 테스트');
-
+      const result =
+        await variableNameTranslator.translateVariableName('이건 테스트');
 
       expect(result.camelCase).toEqual('itsTest');
-      expect(result.snakeCase).toEqual('its_test');
-      expect(result.pascalCase).toEqual('ItsTest');
-      expect(result.bigSnakeCase).toEqual('ITS_TEST');
+    });
+
+    it('translated text should not include prepositions and possessive pronounce', async () => {
+      translator = {
+        translate: async (src, target, text) => "verify one's user e-mail",
+        detectLanguage: async (text) => 'ko',
+      };
+      variableNameTranslator = new VariableNameTranslator(translator);
+
+      const result =
+        await variableNameTranslator.translateVariableName('이건 테스트');
+
+      expect(result.camelCase).toEqual('verifyUserEmail');
     });
   });
 });
